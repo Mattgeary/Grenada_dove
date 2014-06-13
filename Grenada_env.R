@@ -1,0 +1,11 @@
+library(raster)
+library(dismo)
+
+GRD <- getData('GADM', country='GRD', level=0)
+alt <- getData('alt', country='GRD', mask=TRUE)
+prec <- getData('worldclim', var='prec', res=2.5)
+prec <- crop(prec, extent(GRD)) 
+tmean <- getData('worldclim', var='tmean', res=2.5)
+tmean <- crop(tmean, extent(GRD))
+bio <- getData('worldclim', var='bio', res=2.5)
+bio <- crop(bio, extent(GRD))

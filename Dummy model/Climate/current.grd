@@ -1,0 +1,26 @@
+[general] 
+creator=R package 'raster' 
+created= 2014-06-12 14:17:38 
+[georeference] 
+nrows= 30 
+ncols= 24 
+xmin= -61.8 
+ymin= 11.983333333 
+xmax= -61.6 
+ymax= 12.233333333 
+projection= NA 
+[data] 
+datatype= FLT8S 
+byteorder= little 
+nbands= 5 
+bandorder= BIL 
+minvalue= 177:36:75:198:0.792 
+maxvalue= 223:46:108:240:0.96 
+nodatavalue= -1.7e+308 
+[legend] 
+legendtype=  
+values=  
+color=  
+[description] 
+layername= tmin.jan:ppt.season:ppt.aug:tmin.aug:fire 
+history=  
