@@ -233,6 +233,8 @@ climate.fun <- function(model, future){
 }
 
 
+### Need to supply name of model from above - default predicts under all scenarios
+
 future <- function(model, sea = TRUE, develop = TRUE, fire = TRUE, climate = TRUE, all = TRUE, reps=10 , threshold = 0.7){
 
 # Initial area predicted present
