@@ -241,7 +241,7 @@ future <- function(model, sea = TRUE, develop = TRUE, fire = TRUE, climate = TRU
 
 	thresh.rcl <- matrix(c(-1, threshold, 0, threshold, 1.5, 1), nrow=2, ncol=3, byrow=TRUE)
 
-	current.area <- cellStats(reclassify(pred.current, thresh.rcl), sum)
+	current.area <- cellStats(reclassify(pred.current, thresh.rcl), mean)
 
 # Create list to contain results
 
@@ -271,10 +271,10 @@ future <- function(model, sea = TRUE, develop = TRUE, fire = TRUE, climate = TRU
 		max_80 <- climate.fun(model, stack("Climate/max_80.grd"))
 
 	# Calculate proportion of island predicted
-		pred.area$climate$low_26 <- cellStats(reclassify(low_26, thresh.rcl), sum)
-		pred.area$climate$mid_45 <- cellStats(reclassify(mid_45, thresh.rcl), sum)
-		pred.area$climate$high_60 <- cellStats(reclassify(high_60, thresh.rcl), sum)
-		pred.area$climate$max_80 <- cellStats(reclassify(max_80, thresh.rcl), sum)
+		pred.area$climate$low_26 <- cellStats(reclassify(low_26, thresh.rcl), mean)
+		pred.area$climate$mid_45 <- cellStats(reclassify(mid_45, thresh.rcl), mean)
+		pred.area$climate$high_60 <- cellStats(reclassify(high_60, thresh.rcl), mean)
+		pred.area$climate$max_80 <- cellStats(reclassify(max_80, thresh.rcl), mean)
 
 		rm(low_26, mid_45, high_60, max_80)
 	}
@@ -284,21 +284,21 @@ future <- function(model, sea = TRUE, develop = TRUE, fire = TRUE, climate = TRU
 		
 	# Mask initial predictions by sea level change
 		sea.mask <- pred.current + sea.lvl
-		pred.area$sea$sea <- cellStats(reclassify(sea.mask, thresh.rcl), sum)
+		pred.area$sea$sea <- cellStats(reclassify(sea.mask, thresh.rcl), mean)
 
 	# Create future scenarios and mask by sea level
 		sea.map <- climate.fun(model, stack("Climate/low_26.grd"))
 			sea.mask <- sea.map + sea.lvl
-			pred.area$sea$sea.low_26 <- cellStats(reclassify(sea.mask, thresh.rcl), sum)
+			pred.area$sea$sea.low_26 <- cellStats(reclassify(sea.mask, thresh.rcl), mean)
 		sea.map <- climate.fun(model, stack("Climate/mid_45.grd"))
 			sea.mask <- sea.map + sea.lvl
-			pred.area$sea$sea.mid_45 <- cellStats(reclassify(sea.mask, thresh.rcl), sum)
+			pred.area$sea$sea.mid_45 <- cellStats(reclassify(sea.mask, thresh.rcl), mean)
 		sea.map <- climate.fun(model, stack("Climate/high_60.grd"))
 			sea.mask <- sea.map + sea.lvl
-			pred.area$sea$sea.high_60 <- cellStats(reclassify(sea.mask, thresh.rcl), sum)
+			pred.area$sea$sea.high_60 <- cellStats(reclassify(sea.mask, thresh.rcl), mean)
 		sea.map <- climate.fun(model, stack("Climate/max_80.grd"))
 			sea.mask <- sea.map + sea.lvl
-			pred.area$sea$sea.max_80 <- cellStats(reclassify(sea.mask, thresh.rcl), sum)
+			pred.area$sea$sea.max_80 <- cellStats(reclassify(sea.mask, thresh.rcl), mean)
 	
 		rm(sea.map, sea.mask)
 	}
@@ -315,11 +315,11 @@ future <- function(model, sea = TRUE, develop = TRUE, fire = TRUE, climate = TRU
 			dev.mask <- development(cov)
 		
 		# Use simulated development to mask climate predictions
-			pred.area$develop$develop[i] <- cellStats(reclassify(reclassify(pred.current, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T) ), sum)
-			pred.area$develop$dev.low_26[i] <- cellStats(reclassify(reclassify(low_26, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), sum)
-			pred.area$develop$dev.mid_45[i] <- cellStats(reclassify(reclassify(mid_45, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), sum)
-			pred.area$develop$dev.high_60[i] <- cellStats(reclassify(reclassify(high_60, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), sum)
-			pred.area$develop$dev.max_80[i] <- cellStats(reclassify(reclassify(max_80, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), sum)
+			pred.area$develop$develop[i] <- cellStats(reclassify(reclassify(pred.current, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T) ), mean)
+			pred.area$develop$dev.low_26[i] <- cellStats(reclassify(reclassify(low_26, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), mean)
+			pred.area$develop$dev.mid_45[i] <- cellStats(reclassify(reclassify(mid_45, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), mean)
+			pred.area$develop$dev.high_60[i] <- cellStats(reclassify(reclassify(high_60, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), mean)
+			pred.area$develop$dev.max_80[i] <- cellStats(reclassify(reclassify(max_80, thresh.rcl) - dev.mask, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), mean)
 		}
 		rm(low_26, mid_45, high_60, max_80)
 	}
@@ -345,11 +345,11 @@ future <- function(model, sea = TRUE, develop = TRUE, fire = TRUE, climate = TRU
 			fire.dis.max_80 <- reclassify(fire.dis.max_80, matrix(c(-1,0.99999,0, 0.999999, 1, 1), nrow=2, ncol=3, byrow=T))
 		
 		# Use simulated development to mask climate predictions
-			pred.area$fire$fire[i] <- cellStats(reclassify(reclassify(pred.current, thresh.rcl) - fire.dis.current, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), sum)
-			pred.area$fire$fire.low_26[i] <- cellStats(reclassify(reclassify(low_26, thresh.rcl) - fire.dis.low_26, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), sum)
-			pred.area$fire$fire.mid_45[i] <- cellStats(reclassify(reclassify(mid_45, thresh.rcl) - fire.dis.mid_45, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), sum)
-			pred.area$fire$fire.high_60[i] <- cellStats(reclassify(reclassify(high_60, thresh.rcl) - fire.dis.high_60, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), sum)
-			pred.area$fire$fire.max_80[i] <- cellStats(reclassify(reclassify(max_80, thresh.rcl) - fire.dis.max_80, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), sum)
+			pred.area$fire$fire[i] <- cellStats(reclassify(reclassify(pred.current, thresh.rcl) - fire.dis.current, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), mean)
+			pred.area$fire$fire.low_26[i] <- cellStats(reclassify(reclassify(low_26, thresh.rcl) - fire.dis.low_26, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), mean)
+			pred.area$fire$fire.mid_45[i] <- cellStats(reclassify(reclassify(mid_45, thresh.rcl) - fire.dis.mid_45, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), mean)
+			pred.area$fire$fire.high_60[i] <- cellStats(reclassify(reclassify(high_60, thresh.rcl) - fire.dis.high_60, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), mean)
+			pred.area$fire$fire.max_80[i] <- cellStats(reclassify(reclassify(max_80, thresh.rcl) - fire.dis.max_80, matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)), mean)
 		}
 		rm(low_26, mid_45, high_60, max_80)
 	}
@@ -387,48 +387,48 @@ future <- function(model, sea = TRUE, develop = TRUE, fire = TRUE, climate = TRU
 			# Sea level and development
 			mask <- current.bin + sea.lvl
 			mask <- reclassify(mask - dev.mask, matrix(c(-1.5,0,0)))
-			pred.area$all$sea.dev[i] <- cellStats(mask, sum)
+			pred.area$all$sea.dev[i] <- cellStats(mask, mean)
 
 			# Sea level and fire
 			mask <- current.bin + sea.lvl
 			mask <- reclassify(mask - fire.dis.current, matrix(c(-1.5,0,0)))
-			pred.area$all$sea.fire[i] <- cellStats(mask, sum)
+			pred.area$all$sea.fire[i] <- cellStats(mask, mean)
 
 			# Fire and development
 			mask <- reclassify(current.bin - dev.mask, matrix(c(-1.5,0,0)))
 			mask <- reclassify(mask - fire.dis.current, matrix(c(-1.5,0,0)))
-			pred.area$all$dev.fire[i] <- cellStats(mask, sum)
+			pred.area$all$dev.fire[i] <- cellStats(mask, mean)
 
 			# Sea level, development and fire
 			# Current values			
 			mask <- current.bin + sea.lvl
 			mask <- reclassify(mask - dev.mask, matrix(c(-1.5,0,0)))
 			mask <- reclassify(mask - fire.dis.current, matrix(c(-1.5,0,0)))
-			pred.area$all$sea.dev.fire[i] <- cellStats(mask, sum)
+			pred.area$all$sea.dev.fire[i] <- cellStats(mask, mean)
 				
 			# Low_26
 			mask <- low_26 + sea.lvl
 			mask <- reclassify(mask - dev.mask, matrix(c(-1.5,0,0)))
 			mask <- reclassify(mask - fire.dis.low_26, matrix(c(-1.5,0,0)))
-			pred.area$all$all.low_26[i] <- cellStats(mask, sum)
+			pred.area$all$all.low_26[i] <- cellStats(mask, mean)
 
 			# Mid_45
 			mask <- mid_45 + sea.lvl
 			mask <- reclassify(mask - dev.mask, matrix(c(-1.5,0,0)))
 			mask <- reclassify(mask - fire.dis.mid_45, matrix(c(-1.5,0,0)))
-			pred.area$all$all.mid_45[i] <- cellStats(mask, sum)
+			pred.area$all$all.mid_45[i] <- cellStats(mask, mean)
 
 			# High_60
 			mask <- high_60 + sea.lvl
 			mask <- reclassify(mask - dev.mask, matrix(c(-1.5,0,0)))
 			mask <- reclassify(mask - fire.dis.high_60, matrix(c(-1.5,0,0)))
-			pred.area$all$all.high_60[i] <- cellStats(mask, sum)
+			pred.area$all$all.high_60[i] <- cellStats(mask, mean)
 
 			# Max_80
 			mask <- max_80 + sea.lvl
 			mask <- reclassify(mask - dev.mask, matrix(c(-1.5,0,0)))
 			mask <- reclassify(mask - fire.dis.max_80, matrix(c(-1.5,0,0)))
-			pred.area$all$all.max_80[i] <- cellStats(mask, sum)
+			pred.area$all$all.max_80[i] <- cellStats(mask, mean)
 
 		}
 		rm(low_26, mid_45, high_60, max_80, mask, dev.mask, fire.dis)
