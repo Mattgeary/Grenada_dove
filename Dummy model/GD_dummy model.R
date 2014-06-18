@@ -7,6 +7,8 @@ library(sp)
 library(dismo)
 library(MuMIn)
 
+options("na.action" = na.fail) 
+
 
 ### Load environmental and species location data
 
@@ -85,13 +87,13 @@ sea.lvl <- reclassify(alt, matrix(c(-354, 1.2, NA, 1.2, 3000, 0), nrow=2, ncol=3
 
 # Dove locations
 
-	dove <- randomPoints(alt, 300, ext=extent(GRD))
+	dove <- randomPoints(alt, 100, ext=extent(GRD))
 
 	dove <- data.frame(x = dove[,1], y=dove[,2], pres = 0)
 	
-	dove$pres[sample(c(1:length(dove$pres)), 150)] <-1
+	dove$pres[sample(c(1:length(dove$pres)), 80)] <-1
 
-	train.rows <- sample(c(1:length(dove$pres)), 200)
+	train.rows <- sample(c(1:length(dove$pres)), 20)
 	train.dove <- dove[train.rows,]
 	test.dove <- dove[-train.rows,]
 
@@ -172,7 +174,7 @@ f.Exp <- function(map, base.map, p.trans){
                mat.cor <- mat.0 + mat.prob
               mat.cor <- apply(mat.cor, c(1,2), f.correct)
                mat.new <- apply(mat.cor, c(1,2), f.bin)
-               map.new <- raster(mat.new, xmn=xmin(map), xmx=xmax(map), ymn=ymin(map), ymx=ymax(map), crs=paste(projection(map)))
+               map.new <- raster(mat.new, xmn=xmin(map), xmx=xmax(map), ymn=ymin(map), ymx=ymax(map)) # need to add CRS to thins function if we want one
 }
 
 
@@ -184,7 +186,8 @@ fire.risk <- function(fire, p.trans=0.05, iterations=50,  fires = 10, threshold 
 
 	rnd.pts <- randomPoints(potential, fires)
 	rnd.pts <- as.data.frame(rnd.pts)
-	potential.pts <- rasterize(rnd.pts, potential, background=0)
+	potential.pts <- rasterize(rnd.pts, potential, field = 1, background=0)
+  potential.pts
 	potential.pts <- potential + potential.pts
 
 	wildfire <- f.Exp(potential.pts, potential.pts, p.trans)
@@ -201,13 +204,13 @@ fire.risk <- function(fire, p.trans=0.05, iterations=50,  fires = 10, threshold 
 development <- function(cov, p.trans=0.1, iterations=50,  hotels = 10, total = 40){
 	rnd.pts <- randomPoints(cov, hotels)
 	rnd.pts <- as.data.frame(rnd.pts)
-	potential.pts <- rasterize(rnd.pts, cov, background=0)
+  potential.pts <- rasterize(rnd.pts, cov, field = 1, background=0)
 	potential.pts <- cov + potential.pts
 
-	develop <- f.Exp(potential.pts, potential.pts, p.trans)
+	develop <- f.Exp(potential.pts, cov, p.trans)
 	for(i in 1:iterations){
 		if(cellStats(develop, sum) <= total) develop <- f.Exp(develop, potential.pts, p.trans)
-		else develope <- develop
+		else develop <- develop
 	    }
 
 	return(develop)
