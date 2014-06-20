@@ -128,7 +128,7 @@ test.env <- data.frame(pres = test.dove$pres, alt = extract(alt, test.dove[,1:2]
 
 	env.vars <- data.frame(tmin.jan = as.data.frame(as(current$tmin.jan, "SpatialGridDataFrame"))[,1], ppt.season = as.data.frame(as(current$ppt.season, "SpatialGridDataFrame"))[,1], ppt.aug = as.data.frame(as(current$ppt.aug, "SpatialGridDataFrame"))[,1], tmin.aug = as.data.frame(as(current$tmin.aug, "SpatialGridDataFrame"))[,1], fire = as.data.frame(as(current$fire, "SpatialGridDataFrame"))[,1])
 
-	pred <- predict(dove.avg, newdata = env.vars)
+	pred <- predict(dove.avg, newdata = env.vars, type="response")
 
 	pred.df <- data.frame(data = pred, x = as.data.frame(as(current$ppt.aug, "SpatialGridDataFrame"))[,2], y = as.data.frame(as(current$ppt.aug, "SpatialGridDataFrame"))[,3])
 
@@ -222,7 +222,7 @@ climate.fun <- function(model, future){
 
 	env.vars <- data.frame(tmin.jan = as.data.frame(as(future$tmin.jan, "SpatialGridDataFrame"))[,1], ppt.season = as.data.frame(as(future$ppt.season, "SpatialGridDataFrame"))[,1], ppt.aug = as.data.frame(as(future$ppt.aug, "SpatialGridDataFrame"))[,1], tmin.aug = as.data.frame(as(future$tmin.aug, "SpatialGridDataFrame"))[,1], fire = as.data.frame(as(future$fire, "SpatialGridDataFrame"))[,1])
 
-	pred <- predict(model, newdata = env.vars)
+	pred <- predict(model, newdata = env.vars, type="response")
 
 	pred.df <- data.frame(data = pred, x = as.data.frame(as(future$ppt.aug, "SpatialGridDataFrame"))[,2], y = as.data.frame(as(future$ppt.aug, "SpatialGridDataFrame"))[,3])
 
