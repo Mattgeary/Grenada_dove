@@ -28,10 +28,13 @@ options("na.action" = na.fail)
 	
 	setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/dem")
 		alt <- raster('GRD_alt.asc')
-	dem <- raster("DEM.img")
-	dem <- spTransform(dem, CRS = CRS("+init=epsg:4326"))
-	
-	dem.r <- resample(dem, alt)
+	# dem <- raster("DEM.img")
+	# dem <- projectRaster(dem, crs = CRS("+init=epsg:4326"))
+	# dem.r <- resample(dem, alt)
+	# rm(dem)
+	# writeRaster(dem.r, "dem_resample.asc")
+	dem.r <- raster("dem_resample.asc")
+	setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/")
 
 
 
@@ -73,7 +76,7 @@ options("na.action" = na.fail)
 # 
 # m.temp.dry.qrt <- subset(BIO, 9)
 
-setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/current")
+setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/Current_clim")
 
 ppt.season <- raster("ppt.season.asc")
 
@@ -126,7 +129,7 @@ setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/")
 
 #### Create FAKE fire risk raster
 
-#	fire <- (tmin.aug/1000) * 4
+#	fire <- (m.temp.dry.qrt/1000) * 4
 
 # Load current climate stack
 
@@ -169,9 +172,9 @@ sea.lvl <- reclassify(alt, matrix(c(-354, 1.2, NA, 1.2, 3000, 0), nrow=2, ncol=3
 
 #	dove.env <- data.frame(pres = dove$pres, alt = extract(alt, dove[,1:2]), tmin.jan = extract(tmin.jan, dove[,1:2]), tmin.aug = extract(tmin.aug, dove[,1:2]), temp.range = extract(temp.range, dove[,1:2]), ppt.jan = extract(ppt.jan, dove[,1:2]), ppt.aug = extract(ppt.aug, dove[,1:2]), ppt.season = extract(ppt.season, dove[,1:2]), fire = extract(fire, dove[,1:2]))
 
-dove.env <- data.frame(pres = train.dove$pres, alt = extract(alt, train.dove[,1:2]), tmin.jan = extract(current$tmin.jan, train.dove[,1:2]), tmin.aug = extract(current$tmin.aug, train.dove[,1:2]), ppt.aug = extract(current$ppt.aug, train.dove[,1:2]), ppt.season = extract(current$ppt.season, train.dove[,1:2]), fire = extract(current$fire, train.dove[,1:2]))
+dove.env <- data.frame(pres = train.dove$pres, dem.r = extract(dem.r, train.dove[,1:2]), ppt.dry.month  = extract(ppt.dry.month, train.dove[,1:2]), ppt.dry.month = extract(ppt.dry.month, train.dove[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, train.dove[,1:2]), ppt.season = extract(ppt.season, train.dove[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, train.dove[,1:2]), soil.raster.code = extract(soil.raster.code, train.dove[,1:2]), geol.raster.code = extract(soil.raster.code, train.dove[,1:2]), fire = extract(fire, train.dove[,1:2]))
 
-test.env <- data.frame(pres = test.dove$pres, alt = extract(alt, test.dove[,1:2]), tmin.jan = extract(current$tmin.jan, test.dove[,1:2]), tmin.aug = extract(current$tmin.aug, test.dove[,1:2]), ppt.aug = extract(current$ppt.aug, test.dove[,1:2]), ppt.season = extract(current$ppt.season, test.dove[,1:2]), fire = extract(current$fire, test.dove[,1:2]))
+test.env <- data.frame(pres = test.dove$pres, dem.r = extract(dem.r, test.dove[,1:2]), ppt.dry.month  = extract(ppt.dry.month, test.dove[,1:2]), ppt.dry.month = extract(ppt.dry.month, test.dove[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, test.dove[,1:2]), ppt.season = extract(ppt.season, test.dove[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, test.dove[,1:2]), soil.raster.code = extract(soil.raster.code, test.dove[,1:2]), geol.raster.code = extract(soil.raster.code, test.dove[,1:2]), fire = extract(fire, test.dove[,1:2]))
 
 # Test for correlated variables
 
@@ -194,8 +197,8 @@ test.env <- data.frame(pres = test.dove$pres, alt = extract(alt, test.dove[,1:2]
 
 # Predictions
 
-	env.vars <- data.frame(tmin.jan = as.data.frame(as(current$tmin.jan, "SpatialGridDataFrame"))[,1], ppt.season = as.data.frame(as(current$ppt.season, "SpatialGridDataFrame"))[,1], ppt.aug = as.data.frame(as(current$ppt.aug, "SpatialGridDataFrame"))[,1], tmin.aug = as.data.frame(as(current$tmin.aug, "SpatialGridDataFrame"))[,1], fire = as.data.frame(as(current$fire, "SpatialGridDataFrame"))[,1])
-
+	env.vars <- data.frame(dem.r = as.data.frame(as(dem.r, "SpatialGridDataFrame"))[,1], ppt.season = as.data.frame(as(ppt.season, "SpatialGridDataFrame"))[,1], ppt.dry.month = as.data.frame(as(ppt.dry.month, "SpatialGridDataFrame"))[,1], ppt.dry.qrt = as.data.frame(as(ppt.dry.qrt, "SpatialGridDataFrame"))[,1], m.temp.dry.qrt = as.data.frame(as(m.temp.dry.qrt, "SpatialGridDataFrame"))[,1], soil.raster.code = as.data.frame(as(soil.raster.code, "SpatialGridDataFrame"))[,1], geol.raster.code = as.data.frame(as(geol.raster.code, "SpatialGridDataFrame"))[,1], fire = as.data.frame(as(fire, "SpatialGridDataFrame"))[,1])
+	
 	pred <- predict(dove.avg, newdata = env.vars, type="response")
 
 	pred.df <- data.frame(data = pred, x = as.data.frame(as(current$ppt.aug, "SpatialGridDataFrame"))[,2], y = as.data.frame(as(current$ppt.aug, "SpatialGridDataFrame"))[,3])
