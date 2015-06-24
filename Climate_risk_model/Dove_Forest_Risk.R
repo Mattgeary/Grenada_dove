@@ -27,9 +27,13 @@ options("na.action" = na.fail)
 	#alt <- crop(alt, GRD)
 	
 	setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/dem")
+		alt <- raster('GRD_alt.asc')
 	dem <- raster("DEM.img")
+	dem <- spTransform(dem, CRS = CRS("+init=epsg:4326"))
+	
+	dem.r <- resample(dem, alt)
 
-	# alt <- raster('GRD_alt.asc')
+
 
 ## Precipitation
 
@@ -126,7 +130,7 @@ setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/")
 
 # Load current climate stack
 
-	current <- stack("Climate/current.grd")
+	# current <- stack("Climate/current.grd")
 
 # Create landcover raster mask
 
