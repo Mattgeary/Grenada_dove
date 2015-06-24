@@ -172,9 +172,9 @@ sea.lvl <- reclassify(alt, matrix(c(-354, 1.2, NA, 1.2, 3000, 0), nrow=2, ncol=3
 
 #	dove.env <- data.frame(pres = dove$pres, alt = extract(alt, dove[,1:2]), tmin.jan = extract(tmin.jan, dove[,1:2]), tmin.aug = extract(tmin.aug, dove[,1:2]), temp.range = extract(temp.range, dove[,1:2]), ppt.jan = extract(ppt.jan, dove[,1:2]), ppt.aug = extract(ppt.aug, dove[,1:2]), ppt.season = extract(ppt.season, dove[,1:2]), fire = extract(fire, dove[,1:2]))
 
-dove.env <- data.frame(pres = train.dove$pres, dem.r = extract(dem.r, train.dove[,1:2]), ppt.dry.month  = extract(ppt.dry.month, train.dove[,1:2]), ppt.dry.month = extract(ppt.dry.month, train.dove[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, train.dove[,1:2]), ppt.season = extract(ppt.season, train.dove[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, train.dove[,1:2]), soil.raster.code = extract(soil.raster.code, train.dove[,1:2]), geol.raster.code = extract(soil.raster.code, train.dove[,1:2]), fire = extract(fire, train.dove[,1:2]))
+dove.env <- data.frame(pres = train.dove$pres, dem.r = extract(dem.r, train.dove[,1:2]), ppt.dry.month  = extract(ppt.dry.month, train.dove[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, train.dove[,1:2]), ppt.season = extract(ppt.season, train.dove[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, train.dove[,1:2]), soil.raster.code = extract(soil.raster.code, train.dove[,1:2]), geol.raster.code = extract(soil.raster.code, train.dove[,1:2]), fire = extract(fire, train.dove[,1:2]))
 
-test.env <- data.frame(pres = test.dove$pres, dem.r = extract(dem.r, test.dove[,1:2]), ppt.dry.month  = extract(ppt.dry.month, test.dove[,1:2]), ppt.dry.month = extract(ppt.dry.month, test.dove[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, test.dove[,1:2]), ppt.season = extract(ppt.season, test.dove[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, test.dove[,1:2]), soil.raster.code = extract(soil.raster.code, test.dove[,1:2]), geol.raster.code = extract(soil.raster.code, test.dove[,1:2]), fire = extract(fire, test.dove[,1:2]))
+test.env <- data.frame(pres = test.dove$pres, dem.r = extract(dem.r, test.dove[,1:2]), ppt.dry.month  = extract(ppt.dry.month, test.dove[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, test.dove[,1:2]), ppt.season = extract(ppt.season, test.dove[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, test.dove[,1:2]), soil.raster.code = extract(soil.raster.code, test.dove[,1:2]), geol.raster.code = extract(soil.raster.code, test.dove[,1:2]), fire = extract(fire, test.dove[,1:2]))
 
 # Test for correlated variables
 
@@ -182,7 +182,7 @@ test.env <- data.frame(pres = test.dove$pres, dem.r = extract(dem.r, test.dove[,
 
 # Define global model with all candidate predictors
 	
-	dove.mod <- glm(pres ~ tmin.jan + ppt.season + fire + ppt.aug * tmin.aug, family = binomial(link='logit'), data=dove.env)
+	dove.mod <- glm(pres ~ dem.r + ppt.dry.month + ppt.dry.qrt + ppt.season + m.temp.dry.qrt + soil.raster.code + geol.raster.code + fire, family = binomial(link='logit'), data=dove.env)
 
 # Fit all candidate models
 
