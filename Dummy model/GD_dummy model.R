@@ -22,11 +22,11 @@ options("na.action" = na.fail)
 
 # Altitude
 
-	#alt <- getData('alt', country='GRD')
+	alt <- getData('alt', country='GRD')
 
-	#alt <- crop(alt, GRD)
+	alt <- crop(alt, GRD)
 
-	alt <- raster('GRD_alt.asc')
+	#alt <- raster('GRD_alt.asc')
 
 ## Precipitation
 
@@ -54,11 +54,25 @@ options("na.action" = na.fail)
 
 ## BIOCLIM variables
 
-#	#BIO <- getData('worldclim', var='bio', res=0.5, lat = 12.05, lon = -61.75)
+# 	BIO <- getData('worldclim', var='bio', res=0.5, lat = 12.05, lon = -61.75)
+# 
+# 	BIO <- crop(BIO, extent(GRD))
+# 
+# ppt.season <- subset(BIO, 15)
+# 
+# ppt.dry.month <- subset(BIO, 14)
+# 
+# ppt.dry.qrt <- subset(BIO, 17)
+# 
+# m.temp.dry.qrt <- subset(BIO, 9)
 
-#	#BIO <- crop(BIO, extent(GRD))
+ppt.season <- raster("ppt.season.asc")
 
-#	#ppt.season <- subset(BIO, 15)
+ppt.dry.month <- raster("ppt.dry.month.asc")
+
+ppt.dry.qrt <- raster("ppt.dry.qrt.asc")
+
+m.temp.dry.qrt <- raster("m.temp.dry.qrt.asc")
 
 #	#temp.range <- subset(BIO, 7)
 
@@ -151,15 +165,18 @@ test.env <- data.frame(pres = test.dove$pres, alt = extract(alt, test.dove[,1:2]
 
 ## Functions to 'grow' patches
 
+# Probability of transition
 f.prob <- function(x, p.trans){
           x*p.trans
  }
 
+ # Selects from a binary distribution to determine transition
 f.bin <- function(x){
     if(!is.na(x)) x <- rbinom(1,1,x)
     else x <- NA
  }
 
+ # Corrects for probabilities > 1
 f.correct <- function(x){
   if(!is.na(x) && x > 1) x <- 1
   else x
