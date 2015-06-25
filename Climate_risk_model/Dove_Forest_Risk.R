@@ -170,11 +170,10 @@ sea.lvl <- reclassify(alt, matrix(c(-354, 1.2, NA, 1.2, 3000, 0), nrow=2, ncol=3
 
 # Dove locations
 
-	species.pa <- read.csv("InidcatorPresAbs.csv")
-	species.pa <- species.pa[-31:32,]
-	forest.pa <- data.frame(lat = species.pa$lat, long = species.pa$long, pa = species.pa$ALL)
+	species.pa <- read.csv("indicatorPresAbs_MOD.csv")
+	forest.pa <- data.frame(long = species.pa$long, lat = species.pa$lat, pa = species.pa$ALL)
 	
-	train.rows <- sample(c(1:length(forest.pa$pa)), 20)
+	train.rows <- sample(c(1:length(forest.pa$pa)), 37)
 	train.forest <- forest.pa[train.rows,]
 	test.forest <- forest.pa[-train.rows,]
 
@@ -182,9 +181,9 @@ sea.lvl <- reclassify(alt, matrix(c(-354, 1.2, NA, 1.2, 3000, 0), nrow=2, ncol=3
 
 #	forest.env <- data.frame(pres = dove$pres, alt = extract(alt, dove[,1:2]), tmin.jan = extract(tmin.jan, dove[,1:2]), tmin.aug = extract(tmin.aug, dove[,1:2]), temp.range = extract(temp.range, dove[,1:2]), ppt.jan = extract(ppt.jan, dove[,1:2]), ppt.aug = extract(ppt.aug, dove[,1:2]), ppt.season = extract(ppt.season, dove[,1:2]), fire = extract(fire, dove[,1:2]))
 
-forest.env <- data.frame(pres = train.forest$pres, dem.r = extract(dem.r, train.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, train.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, train.forest[,1:2]), ppt.season = extract(ppt.season, train.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, train.forest[,1:2]), soil.raster.code = extract(soil.raster.code, train.forest[,1:2]), geol.raster.code = extract(soil.raster.code, train.forest[,1:2]), fire = extract(fire, train.forest[,1:2]))
+forest.env <- data.frame(lat = train.forest$lat, long = train.forest$long, pres = train.forest$pa, dem.r = extract(dem.r, train.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, train.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, train.forest[,1:2]), ppt.season = extract(ppt.season, train.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, train.forest[,1:2]), soil.raster.code = extract(soil.raster.code, train.forest[,1:2]), geol.raster.code = extract(soil.raster.code, train.forest[,1:2]), fire = extract(fire, train.forest[,1:2]))
 
-test.env <- data.frame(pres = test.forest$pres, dem.r = extract(dem.r, test.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, test.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, test.forest[,1:2]), ppt.season = extract(ppt.season, test.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, test.forest[,1:2]), soil.raster.code = extract(soil.raster.code, test.forest[,1:2]), geol.raster.code = extract(soil.raster.code, test.forest[,1:2]), fire = extract(fire, test.forest[,1:2]))
+test.env <- data.frame(lat = test.forest$lat, long = test.forest$long, pres = test.forest$pa, dem.r = extract(dem.r, test.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, test.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, test.forest[,1:2]), ppt.season = extract(ppt.season, test.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, test.forest[,1:2]), soil.raster.code = extract(soil.raster.code, test.forest[,1:2]), geol.raster.code = extract(soil.raster.code, test.forest[,1:2]), fire = extract(fire, test.forest[,1:2]))
 
 # Test for correlated variables
 
