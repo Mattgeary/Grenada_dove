@@ -2,12 +2,15 @@ list.of.packages <- c("raster", "sp", "dismo", "MuMIn")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
+library(rgdal)
 library(raster)
 library(sp)
 library(dismo)
 library(MuMIn)
 
 options("na.action" = na.fail) 
+
+work <- getwd()
 
 
 ### Load environmental and species location data
@@ -26,7 +29,7 @@ options("na.action" = na.fail)
 
 	#alt <- crop(alt, GRD)
 	
-	setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/dem")
+	setwd(paste(work, "/Climate_risk_model/dem", sep = ""))
 		alt <- raster('GRD_alt.asc')
 	# dem <- raster("DEM.img")
 	# dem <- projectRaster(dem, crs = CRS("+init=epsg:4326"))
@@ -34,7 +37,9 @@ options("na.action" = na.fail)
 	# rm(dem)
 	# writeRaster(dem.r, "dem_resample.asc")
 	dem.r <- raster("dem_resample.asc")
-	setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/")
+  slope <- raster("slope.asc")
+  aspect <- raster("aspect.asc")
+	setwd(paste(work, "/Climate_risk_model/", sep = ""))
 
 
 
@@ -76,7 +81,7 @@ options("na.action" = na.fail)
 # 
 # m.temp.dry.qrt <- subset(BIO, 9)
 
-setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/Current_clim")
+setwd(paste(work, "/Climate_risk_model/Current_clim", sep = ""))
 
 ppt.season <- raster("ppt.season.asc")
 
@@ -99,9 +104,9 @@ m.temp.dry.qrt <- raster("m.temp.dry.qrt.asc")
 # r <- raster(ext, ncol=xy[1]*5, nrow=xy[2]*5)
 # 
 # # Soil 
- setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/Land_use")
+ setwd(paste(work, "/Climate_risk_model/Land_use", sep = ""))
 # 
-# soil <-  readOGR(dsn = "C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/Land_use", layer  = "Soils")
+# soil <-  readOGR(dsn = paste(work, "/Climate_risk_model/Land_use", layer  = "Soils")
 # soil <- spTransform(soil, CRS = CRS("+init=epsg:4326"))
 # 
 #                 ## Rasterize the shapefile
@@ -114,7 +119,7 @@ soil.raster.desc <- raster("soil.raster.desc.asc")
 
 #  Geology
 
-# geol <-  readOGR(dsn = "C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/Land_use", layer  = "Geology")
+# geol <-  readOGR(dsn = paste(work, "/Climate_risk_model/Land_use", layer  = "Geology")
 # geol <- spTransform(geol, CRS = CRS("+init=epsg:4326"))
 # 
 #                 ## Rasterize the shapefile
@@ -124,12 +129,19 @@ soil.raster.desc <- raster("soil.raster.desc.asc")
 # writeRaster(geol.raster.desc, "geol.raster.desc.asc")
 geol.raster.code <- raster("geol.raster.code.asc")
 geol.raster.desc <- raster("geol.raster.desc.asc")
-setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/")
+setwd(paste(work, "/Climate_risk_model/", sep = ""))
 
 
-#### Create FAKE fire risk raster
+#### Fire risk raster
 
-#	fire <- (m.temp.dry.qrt/1000) * 4
+setwd(paste(work, "/Climate_risk_model/Current_clim", sep = ""))
+
+#fire <- raster("weightedall12.tif")
+#fire <- projectRaster(fire, crs = CRS("+init=epsg:4326"))
+#fire <- resample(fire, alt)
+#writeRaster(fire, "fire.asc")
+fire <- raster("fire.asc")
+setwd(paste(work, "/Climate_risk_model/", sep = ""))
 
 # Load current climate stack
 
@@ -137,8 +149,8 @@ setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/")
 
 # Create landcover raster mask
 
-setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/Land_use")
-# land.use <-  readOGR(dsn = "C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/Land_use", layer  = "Landuse2009")
+setwd(paste(work, "/Climate_risk_model/Land_use", sep = ""))
+# land.use <-  readOGR(dsn = paste(work, "/Climate_risk_model/Land_use", layer  = "Landuse2009")
 # land.use <- spTransform(land.use, CRS = CRS("+init=epsg:4326"))
 # land.use.levels <- data.frame(land.use = c(levels(land.use$LUDESC)), value = c(1:8))
 #                 ## Rasterize the shapefile
@@ -149,7 +161,7 @@ setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/Land_use
 # writeRaster(land.use.mask, "land.use.mask.asc")
 land.use <- raster("land.use.asc")
 land.use.mask <- raster("land.use.mask.asc")
-setwd("C:/Users/mgeary/Dropbox/Research/Grenada Dove/Climate_risk_model/")
+setwd(paste(work, "/Climate_risk_model/", sep = ""))
 # Sea level rise
 
 #	sea.low <- reclassify(alt, matrix(c(-354, 0.6, NA), nrow=3, ncol=3, byrow=T))
@@ -158,35 +170,33 @@ sea.lvl <- reclassify(alt, matrix(c(-354, 1.2, NA, 1.2, 3000, 0), nrow=2, ncol=3
 
 # Dove locations
 
-	dove <- randomPoints(alt, 100, ext=extent(GRD))
-
-	dove <- data.frame(x = dove[,1], y=dove[,2], pres = 0)
+	species.pa <- read.csv("InidcatorPresAbs.csv")
+	species.pa <- species.pa[-31:32,]
+	forest.pa <- data.frame(lat = species.pa$lat, long = species.pa$long, pa = species.pa$ALL)
 	
-	dove$pres[sample(c(1:length(dove$pres)), 80)] <-1
-
-	train.rows <- sample(c(1:length(dove$pres)), 20)
-	train.dove <- dove[train.rows,]
-	test.dove <- dove[-train.rows,]
+	train.rows <- sample(c(1:length(forest.pa$pa)), 20)
+	train.forest <- forest.pa[train.rows,]
+	test.forest <- forest.pa[-train.rows,]
 
 ### Create environmental data frame for modelling
 
-#	dove.env <- data.frame(pres = dove$pres, alt = extract(alt, dove[,1:2]), tmin.jan = extract(tmin.jan, dove[,1:2]), tmin.aug = extract(tmin.aug, dove[,1:2]), temp.range = extract(temp.range, dove[,1:2]), ppt.jan = extract(ppt.jan, dove[,1:2]), ppt.aug = extract(ppt.aug, dove[,1:2]), ppt.season = extract(ppt.season, dove[,1:2]), fire = extract(fire, dove[,1:2]))
+#	forest.env <- data.frame(pres = dove$pres, alt = extract(alt, dove[,1:2]), tmin.jan = extract(tmin.jan, dove[,1:2]), tmin.aug = extract(tmin.aug, dove[,1:2]), temp.range = extract(temp.range, dove[,1:2]), ppt.jan = extract(ppt.jan, dove[,1:2]), ppt.aug = extract(ppt.aug, dove[,1:2]), ppt.season = extract(ppt.season, dove[,1:2]), fire = extract(fire, dove[,1:2]))
 
-dove.env <- data.frame(pres = train.dove$pres, dem.r = extract(dem.r, train.dove[,1:2]), ppt.dry.month  = extract(ppt.dry.month, train.dove[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, train.dove[,1:2]), ppt.season = extract(ppt.season, train.dove[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, train.dove[,1:2]), soil.raster.code = extract(soil.raster.code, train.dove[,1:2]), geol.raster.code = extract(soil.raster.code, train.dove[,1:2]), fire = extract(fire, train.dove[,1:2]))
+forest.env <- data.frame(pres = train.forest$pres, dem.r = extract(dem.r, train.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, train.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, train.forest[,1:2]), ppt.season = extract(ppt.season, train.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, train.forest[,1:2]), soil.raster.code = extract(soil.raster.code, train.forest[,1:2]), geol.raster.code = extract(soil.raster.code, train.forest[,1:2]), fire = extract(fire, train.forest[,1:2]))
 
-test.env <- data.frame(pres = test.dove$pres, dem.r = extract(dem.r, test.dove[,1:2]), ppt.dry.month  = extract(ppt.dry.month, test.dove[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, test.dove[,1:2]), ppt.season = extract(ppt.season, test.dove[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, test.dove[,1:2]), soil.raster.code = extract(soil.raster.code, test.dove[,1:2]), geol.raster.code = extract(soil.raster.code, test.dove[,1:2]), fire = extract(fire, test.dove[,1:2]))
+test.env <- data.frame(pres = test.forest$pres, dem.r = extract(dem.r, test.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, test.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, test.forest[,1:2]), ppt.season = extract(ppt.season, test.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, test.forest[,1:2]), soil.raster.code = extract(soil.raster.code, test.forest[,1:2]), geol.raster.code = extract(soil.raster.code, test.forest[,1:2]), fire = extract(fire, test.forest[,1:2]))
 
 # Test for correlated variables
 
-	cor(dove.env) # They are all far too correlated - not to worry for now
+	cor(forest.env) # They are all far too correlated - not to worry for now
 
 # Define global model with all candidate predictors
 	
-	dove.mod <- glm(pres ~ dem.r + ppt.dry.month + ppt.dry.qrt + ppt.season + m.temp.dry.qrt + soil.raster.code + geol.raster.code + fire, family = binomial(link='logit'), data=dove.env)
+	forest.mod <- glm(pres ~ dem.r + ppt.dry.month + ppt.dry.qrt + ppt.season + m.temp.dry.qrt + soil.raster.code + geol.raster.code + fire, family = binomial(link='logit'), data=forest.env)
 
 # Fit all candidate models
 
-	models.dove <- dredge(dove.mod)
+	models.dove <- dredge(forest.mod)
 
 # Average models with delta < 4
 
