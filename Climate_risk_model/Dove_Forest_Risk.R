@@ -1,4 +1,4 @@
-list.of.packages <- c("raster", "sp", "dismo", "MuMIn")
+list.of.packages <- c("raster", "sp", "dismo", "MuMIn", "rgdal", "rms")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -7,6 +7,7 @@ library(raster)
 library(sp)
 library(dismo)
 library(MuMIn)
+library(rms)
 
 options("na.action" = na.fail) 
 
@@ -181,36 +182,59 @@ sea.lvl <- reclassify(alt, matrix(c(-354, 1.2, NA, 1.2, 3000, 0), nrow=2, ncol=3
 
 #	forest.env <- data.frame(pres = dove$pres, alt = extract(alt, dove[,1:2]), tmin.jan = extract(tmin.jan, dove[,1:2]), tmin.aug = extract(tmin.aug, dove[,1:2]), temp.range = extract(temp.range, dove[,1:2]), ppt.jan = extract(ppt.jan, dove[,1:2]), ppt.aug = extract(ppt.aug, dove[,1:2]), ppt.season = extract(ppt.season, dove[,1:2]), fire = extract(fire, dove[,1:2]))
 
-forest.env <- data.frame(lat = train.forest$lat, long = train.forest$long, pres = train.forest$pa, dem.r = extract(dem.r, train.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, train.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, train.forest[,1:2]), ppt.season = extract(ppt.season, train.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, train.forest[,1:2]), soil.raster.code = extract(soil.raster.code, train.forest[,1:2]), geol.raster.code = extract(soil.raster.code, train.forest[,1:2]), fire = extract(fire, train.forest[,1:2]))
+forest.env <- data.frame(lat = train.forest$lat, long = train.forest$long, pres = train.forest$pa, dem.r = extract(dem.r, train.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, train.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, train.forest[,1:2]), ppt.season = extract(ppt.season, train.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, train.forest[,1:2]), soil.raster.code = extract(soil.raster.code, train.forest[,1:2]), geol.raster.code = extract(soil.raster.code, train.forest[,1:2]), fire = extract(fire, train.forest[,1:2]), slope = extract(slope, train.forest[,1:2]), aspect = extract(aspect, train.forest[,1:2]))
 
-test.env <- data.frame(lat = test.forest$lat, long = test.forest$long, pres = test.forest$pa, dem.r = extract(dem.r, test.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, test.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, test.forest[,1:2]), ppt.season = extract(ppt.season, test.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, test.forest[,1:2]), soil.raster.code = extract(soil.raster.code, test.forest[,1:2]), geol.raster.code = extract(soil.raster.code, test.forest[,1:2]), fire = extract(fire, test.forest[,1:2]))
+test.env <- data.frame(lat = test.forest$lat, long = test.forest$long, pres = test.forest$pa, dem.r = extract(dem.r, test.forest[,1:2]), ppt.dry.month  = extract(ppt.dry.month, test.forest[,1:2]), ppt.dry.qrt = extract(ppt.dry.qrt, test.forest[,1:2]), ppt.season = extract(ppt.season, test.forest[,1:2]), m.temp.dry.qrt = extract(m.temp.dry.qrt, test.forest[,1:2]), soil.raster.code = extract(soil.raster.code, test.forest[,1:2]), geol.raster.code = extract(soil.raster.code, test.forest[,1:2]), fire = extract(fire, test.forest[,1:2]), slope = extract(slope, test.forest[,1:2]), aspect = extract(aspect, test.forest[,1:2]))
 
 # Test for correlated variables
 
-	cor(forest.env) # They are all far too correlated - not to worry for now
+	cor(forest.env) 
+
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor)
+{
+  usr <- par("usr"); on.exit(par(usr))
+  par(usr = c(0, 1, 0, 1))
+  r <- abs(cor(x, y, use = "pairwise.complete.obs"))
+  txt <- format(c(r, 0.123456789), digits=digits)[1]
+  txt <- paste(prefix, txt, sep="")
+  if(missing(cex.cor)) cex <- 0.8/strwidth(txt)
+  
+  text(0.5, 0.5, txt, cex = cex * r)   
+}
+
+pairs(forest.env, lower.panel = panel.smooth, upper.panel = panel.cor)
 
 # Define global model with all candidate predictors
-	
-	forest.mod <- glm(pres ~ dem.r + ppt.dry.month + ppt.dry.qrt + ppt.season + m.temp.dry.qrt + soil.raster.code + geol.raster.code + fire, family = binomial(link='logit'), data=forest.env)
 
+#	 forest.mod <- glm(pres ~ dem.r + ppt.dry.month + ppt.dry.qrt + ppt.season + m.temp.dry.qrt + soil.raster.code + geol.raster.code + fire, family = binomial(link='logit'), data=forest.env)
+
+forest.mod <- glm(pres ~ ppt.dry.month + fire + aspect, family = binomial(link='logit'), data=forest.env)
+forest.mod.2 <- glm(pres ~ ppt.dry.month + fire, family = binomial(link='logit'), data=forest.env)
+forest.mod.3 <- glm(pres ~ ppt.dry.month + aspect, family = binomial(link='logit'), data=forest.env)
+forest.AICc <- data.frame(mod = c("Full", "Fire", "Aspect"), AICc = c(AICc(forest.mod), AICc(forest.mod.2), AICc(forest.mod.3)))
+forest.AICc$delta <- forest.AICc$AICc - min(forest.AICc$AICc)
+forest.lrm <- lrm(pres ~ ppt.dry.month + fire + aspect, data=forest.env)
 # Fit all candidate models
+
 
 	models.dove <- dredge(forest.mod)
 
 # Average models with delta < 4
 
-	dove.avg <- model.avg(subset(models.dove, delta < 4), fit=TRUE)
+#	dove.avg <- model.avg(subset(models.dove, delta < 4), fit=TRUE)
 
-	dove.eval <- evaluate(test.env[test.env$pres == 1,], test.env[test.env$pres == 0,], dove.avg)
+	forest.eval <- evaluate(test.env[test.env$pres == 1,], test.env[test.env$pres == 0,], forest.mod)
 
 
 # Predictions
 
-	env.vars <- data.frame(dem.r = as.data.frame(as(dem.r, "SpatialGridDataFrame"))[,1], ppt.season = as.data.frame(as(ppt.season, "SpatialGridDataFrame"))[,1], ppt.dry.month = as.data.frame(as(ppt.dry.month, "SpatialGridDataFrame"))[,1], ppt.dry.qrt = as.data.frame(as(ppt.dry.qrt, "SpatialGridDataFrame"))[,1], m.temp.dry.qrt = as.data.frame(as(m.temp.dry.qrt, "SpatialGridDataFrame"))[,1], soil.raster.code = as.data.frame(as(soil.raster.code, "SpatialGridDataFrame"))[,1], geol.raster.code = as.data.frame(as(geol.raster.code, "SpatialGridDataFrame"))[,1], fire = as.data.frame(as(fire, "SpatialGridDataFrame"))[,1])
-	
-	pred <- predict(dove.avg, newdata = env.vars, type="response")
+#	env.vars <- data.frame(dem.r = as.data.frame(as(dem.r, "SpatialGridDataFrame"))[,1], ppt.season = as.data.frame(as(ppt.season, "SpatialGridDataFrame"))[,1], ppt.dry.month = as.data.frame(as(ppt.dry.month, "SpatialGridDataFrame"))[,1], ppt.dry.qrt = as.data.frame(as(ppt.dry.qrt, "SpatialGridDataFrame"))[,1], m.temp.dry.qrt = as.data.frame(as(m.temp.dry.qrt, "SpatialGridDataFrame"))[,1], soil.raster.code = as.data.frame(as(soil.raster.code, "SpatialGridDataFrame"))[,1], geol.raster.code = as.data.frame(as(geol.raster.code, "SpatialGridDataFrame"))[,1], fire = as.data.frame(as(fire, "SpatialGridDataFrame"))[,1])
+env.vars <- data.frame(ppt.dry.month = as.data.frame(ppt.dry.month), fire = as.data.frame(fire), aspect = as.data.frame(aspect))
 
-	pred.df <- data.frame(data = pred, x = as.data.frame(as(current$ppt.aug, "SpatialGridDataFrame"))[,2], y = as.data.frame(as(current$ppt.aug, "SpatialGridDataFrame"))[,3])
+	pred <- predict(forest.mod, newdata = env.vars, type="response")
+
+	#pred.df <- data.frame(data = pred, x = as.data.frame(as(fire, "SpatialGridDataFrame"))[,2], y = as.data.frame(as(fire, "SpatialGridDataFrame"))[,3])
+pred.df <- data.frame(data = pred, x = coordinates(fire)[,1], y = coordinates(fire)[,2])
 
 	coordinates(pred.df) <- ~x+y
 
@@ -221,7 +245,7 @@ test.env <- data.frame(lat = test.forest$lat, long = test.forest$long, pres = te
 
 # Mask by land cover
 
-	pred.sp.mask <- pred.sp - cov
+	pred.sp.mask <- pred.sp - land.use.mask
 	rcl <- matrix(c(-1.5,0,0), nrow=1, ncol=3, byrow=T)
 	pred.sp.mask <- reclassify(pred.sp.mask, rcl)
 
