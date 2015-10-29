@@ -1,12 +1,21 @@
 .Rproj.user
+
 .Rhistory
+
 .pdf
+
 *.docx
+
 *.zip
+
 *.pdf
+
 *.tif
+
 .tif
+
 *.aux.xml
+
 .aux.xml
 "Grenada Dove Dry Forest CEPF/"
 MODIS/
@@ -32,3 +41,4 @@ foreach.pdf
 gettingstartedParallel.pdf
 (Work - Ubuntu's conflicted copy 2015-07-02).Rhistory
 Grenada Dove Dry Forest CEPF
+>>>>>>> 5673f516a9ca204117209b5273953d1468bc8689
